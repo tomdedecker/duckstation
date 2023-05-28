@@ -509,19 +509,20 @@ bool SwapChain::SelectSurfaceFormat()
     return true;
   }
 
-  // Try to find a suitable format.
-  for (const VkSurfaceFormatKHR& surface_format : surface_formats)
-  {
-    // Some drivers seem to return a SRGB format here (Intel Mesa).
-    // This results in gamma correction when presenting to the screen, which we don't want.
-    // Use a linear format instead, if this is the case.
-    m_surface_format.format = Util::GetLinearFormat(surface_format.format);
-    m_surface_format.colorSpace = surface_format.colorSpace;
-    return true;
-  }
+  // Prioritise surface formats that can be converted to the internal Texture::Format type
+  std::vector<VkSurfaceFormatKHR> preferred_surface_formats = Util::GetPreferredSurfaceFormats(surface_formats);
 
-  Panic("Failed to find a suitable format for swap chain buffers.");
-  return false;
+  // If there are no preferred surface formats, take the first format from the list of supported formats.
+  // Otherwise, take the first format from the list of preferred formats.
+  const VkSurfaceFormatKHR& surface_format =
+    preferred_surface_formats.empty() ? surface_formats[0] : preferred_surface_formats[0];
+
+  // Some drivers seem to return a SRGB format here (Intel Mesa).
+  // This results in gamma correction when presenting to the screen, which we don't want.
+  // Use a linear format instead, if this is the case.
+  m_surface_format.format = Util::GetLinearFormat(surface_format.format);
+  m_surface_format.colorSpace = surface_format.colorSpace;
+  return true;
 }
 
 bool SwapChain::SelectPresentMode()

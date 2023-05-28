@@ -11,6 +11,7 @@
 #include <array>
 #include <cstdarg>
 #include <string_view>
+#include <vector>
 namespace Vulkan::Util {
 
 inline constexpr u32 MakeRGBA8Color(float r, float g, float b, float a)
@@ -23,6 +24,9 @@ inline constexpr u32 MakeRGBA8Color(float r, float g, float b, float a)
 
 bool IsDepthFormat(VkFormat format);
 bool IsCompressedFormat(VkFormat format);
+bool HasBaseFormat(VkFormat format);
+// Filters the list of formats to those that can be converted to the internal Texture::Format type
+std::vector<VkSurfaceFormatKHR> GetPreferredSurfaceFormats(std::vector<VkSurfaceFormatKHR> formats);
 VkFormat GetLinearFormat(VkFormat format);
 u32 GetTexelSize(VkFormat format);
 u32 GetBlockSize(VkFormat format);

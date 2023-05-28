@@ -7,6 +7,7 @@
 #include "../string_util.h"
 #include "context.h"
 #include "shader_compiler.h"
+#include "texture.h"
 
 #include <cmath>
 
@@ -38,6 +39,27 @@ bool Vulkan::Util::IsCompressedFormat(VkFormat format)
     default:
       return false;
   }
+}
+
+bool Vulkan::Util::HasBaseFormat(VkFormat format)
+{
+  return Texture::LookupBaseFormat(format) != Texture::Format::Unknown;
+}
+
+std::vector<VkSurfaceFormatKHR>
+Vulkan::Util::GetPreferredSurfaceFormats(std::vector<VkSurfaceFormatKHR> surface_formats)
+{
+  std::vector<VkSurfaceFormatKHR> preferred_formats;
+
+  for (const VkSurfaceFormatKHR& surface_format : surface_formats)
+  {
+    if (HasBaseFormat(surface_format.format))
+    {
+      preferred_formats.push_back(surface_format);
+    }
+  }
+
+  return preferred_formats;
 }
 
 VkFormat Vulkan::Util::GetLinearFormat(VkFormat format)
